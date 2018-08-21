@@ -1,0 +1,39 @@
+version: '3.1'
+
+services:
+  postgres:
+    build:
+      context: "./dockerfiles/postgres"
+    restart: "unless-stopped"
+    env_file:
+      - "./secrets/postgres.env"
+      - "./secrets/prosody-db.env"
+    volumes:
+      - "./data/postgres/:/var/lib/postgresql/data:Z"
+    networks:
+      - "backend"
+
+  memcached:
+    build:
+      context: "./dockerfiles/memcached"
+    restart: "unless-stopped"
+    networks:
+      - "backend"
+
+  prosody:
+    build:
+      context: "./dockerfiles/prosody"
+    restart: "unless-stopped"
+    depends_on:
+      - "postgres"
+    env_file:
+      - "./secrets/prosody-db.env"
+    volumes:
+      - "./logs/prosody:/var/log/prosody:Z"
+      - "./data/prosody:/etc/prosody:Z"
+    networks:
+      - "backend"
+
+networks:
+  backend:
+    driver: "bridge"

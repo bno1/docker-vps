@@ -1,0 +1,8 @@
+#!/bin/bash
+set -e
+
+psql -v ON_ERROR_STOP=1 <<-EOSQL
+    CREATE USER prosody WITH PASSWORD '$PROSODY_DB_PASSWORD';
+    CREATE DATABASE prosody;
+    GRANT ALL PRIVILEGES ON DATABASE prosody TO prosody;
+EOSQL
