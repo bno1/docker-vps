@@ -11,14 +11,16 @@ services:
     volumes:
       - "./data/postgres/:/var/lib/postgresql/data:Z"
     networks:
-      - "backend"
+      backend:
+        ipv4_address: "10.0.0.10"
 
   memcached:
     build:
       context: "./dockerfiles/memcached"
     restart: "unless-stopped"
     networks:
-      - "backend"
+      backend:
+        ipv4_address: "10.0.0.11"
 
   prosody:
     build:
@@ -30,20 +32,45 @@ services:
       - "./secrets/prosody-db.env"
     volumes:
       - "./logs/prosody:/var/log/prosody:Z"
-      - "./data/prosody:/etc/prosody:Z"
+      - "./data/prosody:/etc/prosody:Z,ro"
     networks:
-      - "backend"
+      backend:
+        ipv4_address: "10.0.0.12"
+
+  znc:
+    build:
+      context: "./dockerfiles/znc"
+    restart: "unless-stopped"
+    volumes:
+      - "./data/znc:/znc-data:Z"
+    networks:
+      backend:
+        ipv4_address:  "10.0.0.13"
 
   nginx:
     build:
       context: "./dockerfiles/nginx"
     restart: "unless-stopped"
+    env_file:
+      - "./env/nginx.env"
     volumes:
       - "./logs/nginx:/var/log/nginx:Z"
-      - "./data/nginx.conf:/etc/nginx/nginx.conf:Z"
+      - "./data/nginx.conf.template:/etc/nginx/nginx.conf.template:Z,ro"
+      - "./data/nginx-certs:/etc/certs:Z,ro"
     networks:
-      - "backend"
+      backend:
+        ipv4_address: "10.0.0.5"
+    expose:
+      - "5222"
+      - "5281"
+      - "31415"
+    ports:
+      - "31416:31415"
 
 networks:
   backend:
     driver: "bridge"
+    ipam:
+      driver: "default"
+      config:
+        - subnet: "10.0.0.0/24"

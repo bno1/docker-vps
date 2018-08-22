@@ -1,0 +1,94 @@
+user  nginx;
+worker_processes  1;
+
+error_log  /var/log/nginx/error.log warn;
+
+events {
+    worker_connections  1024;
+}
+
+# http locations
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+
+    access_log  /var/log/nginx/access.log  main;
+
+    sendfile        on;
+    #tcp_nopush     on;
+
+    keepalive_timeout  65;
+
+    #gzip  on;
+
+    #include /etc/nginx/conf.d/*.conf;
+
+    ssl_certificate     /etc/certs/${NGINX_HOST}.crt;
+    ssl_certificate_key /etc/certs/${NGINX_HOST}.key;
+    ssl_dhparam         /etc/certs/${NGINX_HOST}.dhparam;
+    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
+    ssl_session_cache   shared:SSL_HTTP:10m;
+    ssl_session_timeout 5m;
+
+    # prosody bosh and websocket
+    server {
+        listen       5281 ssl;
+        server_name "${NGINX_HOST}";
+
+        location /http-bind {
+            proxy_pass http://10.0.0.10:5280/http-bind;
+            proxy_set_header Host $host;
+            proxy_set_header X-Forwarded-For $remote_addr;
+            proxy_buffering off;
+            tcp_nodelay on;
+        }
+
+        location /xmpp-websocket {
+            proxy_pass http://10.0.0.10:5280/xmpp-websocket;
+            proxy_set_header Host $host;
+            proxy_set_header X-Forwarded-For $remote_addr;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "Upgrade";
+            proxy_buffering off;
+            tcp_nodelay on;
+        }
+
+        #error_page  404              /404.html;
+
+        # redirect server error pages to the static page /50x.html
+        #error_page   500 502 503 504  /50x.html;
+        #location = /50x.html {
+        #    root   /usr/share/nginx/html;
+        #}
+    }
+}
+
+# streams
+stream {
+    ssl_certificate     /etc/certs/${NGINX_HOST}.crt;
+    ssl_certificate_key /etc/certs/${NGINX_HOST}.key;
+    ssl_dhparam         /etc/certs/${NGINX_HOST}.dhparam;
+    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
+    ssl_session_cache   shared:SSL_STREAM:10m;
+    ssl_session_timeout 5m;
+
+    # prosody c2s
+    server {
+        listen 5222 ssl;
+        proxy_pass 10.0.0.10:5222;
+        tcp_nodelay on;
+    }
+
+    # znc irc and webadmin
+    server {
+        listen 31415 ssl;
+        proxy_pass 10.0.0.13:31415;
+        tcp_nodelay on;
+    }
+}
