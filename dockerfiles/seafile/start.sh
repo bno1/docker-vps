@@ -7,7 +7,7 @@ function link_file() {
         if [ ! -e "data/$1" ]; then
             mv "./$1" "data/$1"
         else
-            rm -f "./$1"
+            rm -r "./$1"
         fi
 
         ln -s "/seafile/data/$1" "./$1"
@@ -17,7 +17,7 @@ function link_file() {
 cd /seafile
 mkdir -p ./data
 
-if [ ! -e ./conf ] || [ ! -e ./ccnet ] || [ ! -e ./seafile-data ] || [ ! -e ./seahub-data ] || [ ! -e ./seahub.db ]; then
+if [ ! -e ./conf ] || [ ! -e ./data/conf ]; then
     ./seafile-server/setup-seafile.sh auto -n "$SEAFILE_SERVER_NAME" -i "$SEAFILE_DOMAIN" -p "$SEAFILE_PORT" -d /seafile/data/storage
 
     if [ -n "$SEAFILE_WEB_WORKERS" ]; then
