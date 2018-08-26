@@ -3,74 +3,99 @@ version: '3.1'
 services:
   postgres:
     build:
-      context: "./dockerfiles/postgres"
-    restart: "unless-stopped"
+      context: './dockerfiles/postgres'
+    restart: 'unless-stopped'
     env_file:
-      - "./secrets/postgres.env"
-      - "./secrets/prosody-db.env"
+      - './secrets/postgres.env'
+      - './secrets/prosody-db.env'
+      - './secrets/seafile-db.env'
     volumes:
-      - "./data/postgres/:/var/lib/postgresql/data:Z"
+      - './data/postgres/:/var/lib/postgresql/data:Z'
     networks:
       backend:
-        ipv4_address: "10.0.0.10"
+        ipv4_address: '10.0.0.10'
 
   memcached:
     build:
-      context: "./dockerfiles/memcached"
-    restart: "unless-stopped"
+      context: './dockerfiles/memcached'
+    restart: 'unless-stopped'
     networks:
       backend:
-        ipv4_address: "10.0.0.11"
+        ipv4_address: '10.0.0.11'
 
   prosody:
     build:
-      context: "./dockerfiles/prosody"
-    restart: "unless-stopped"
+      context: './dockerfiles/prosody'
+    restart: 'unless-stopped'
     depends_on:
-      - "postgres"
+      - 'postgres'
     env_file:
-      - "./secrets/prosody-db.env"
+      - './secrets/prosody-db.env'
     volumes:
-      - "./logs/prosody:/var/log/prosody:Z"
-      - "./data/prosody:/etc/prosody:Z,ro"
+      - './logs/prosody:/var/log/prosody:Z'
+      - './data/prosody:/etc/prosody:Z,ro'
     networks:
       backend:
-        ipv4_address: "10.0.0.12"
+        ipv4_address: '10.0.0.12'
 
   znc:
     build:
-      context: "./dockerfiles/znc"
-    restart: "unless-stopped"
+      context: './dockerfiles/znc'
+    restart: 'unless-stopped'
     volumes:
-      - "./data/znc:/znc-data:Z"
+      - './data/znc:/znc-data:Z'
     networks:
       backend:
-        ipv4_address:  "10.0.0.13"
+        ipv4_address: '10.0.0.13'
+
+  seafile:
+    build:
+      context: './dockerfiles/seafile'
+    env_file:
+      - './env/seafile.env'
+      - './secrets/seafile-db.env'
+      - './secrets/seafile-su.env'
+    environment:
+      - 'SEAFILE_POSTGRES_HOST=postgres'
+      - 'SEAFILE_MEMCACHED_HOST=memcached:11211'
+    restart: 'unless-stopped'
+    depends_on:
+      - 'postgres'
+      - 'memcached'
+    volumes:
+      - './logs/seafile:/seafile/logs:Z'
+      - './data/seafile:/seafile/data:Z'
+    networks:
+      backend:
+        ipv4_address: '10.0.0.14'
 
   nginx:
     build:
-      context: "./dockerfiles/nginx"
-    restart: "unless-stopped"
+      context: './dockerfiles/nginx'
+    restart: 'unless-stopped'
     env_file:
-      - "./env/nginx.env"
+      - './env/nginx.env'
+      - './env/seafile.env'
     volumes:
-      - "./logs/nginx:/var/log/nginx:Z"
-      - "./data/nginx.conf.template:/etc/nginx/nginx.conf.template:Z,ro"
-      - "./data/nginx-certs:/etc/certs:Z,ro"
+      - './logs/nginx:/var/log/nginx:Z'
+      - './data/nginx.conf.template:/etc/nginx/nginx.conf.template:Z,ro'
+      - './data/nginx-certs:/etc/certs:Z,ro'
     networks:
       backend:
-        ipv4_address: "10.0.0.5"
+        ipv4_address: '10.0.0.5'
     expose:
-      - "5222"
-      - "5281"
-      - "31415"
+      - '5222'
+      - '5281'
+      - '31415'
+      - '8000'
     ports:
-      - "31416:31415"
+      - '31416:31415'
+      - '8000:8000'
 
 networks:
   backend:
-    driver: "bridge"
+    driver: 'bridge'
     ipam:
-      driver: "default"
+      driver: 'default'
       config:
-        - subnet: "10.0.0.0/24"
+        - subnet: '10.0.0.0/24'
