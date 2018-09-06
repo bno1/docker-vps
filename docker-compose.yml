@@ -9,6 +9,7 @@ services:
       - './secrets/postgres.env'
       - './secrets/prosody-db.env'
       - './secrets/seafile-db.env'
+      - './secrets/synapse-db.env'
     volumes:
       - './data/postgres/:/var/lib/postgresql/data:Z'
     networks:
@@ -69,6 +70,43 @@ services:
       backend:
         ipv4_address: '10.0.0.14'
 
+  synapse:
+    build:
+      context: './dockerfiles/synapse'
+      args:
+        SYNAPSE_TAG: 'v0.33.3'
+        SYNAPSE_HOST: 'example.org'
+    env_file:
+      - './secrets/synapse-db.env'
+      - './secrets/synapse-pepper.env'
+    environment:
+      - 'SYNAPSE_POSTGRES_HOST=postgres'
+    restart: 'unless-stopped'
+    depends_on:
+      - 'postgres'
+      - 'matrix-irc'
+    volumes:
+      - './data/synapse:/data:Z'
+      - './data/synapse-app-services:/app-services:Z'
+      - './data/synapse-uploads:/uploads:Z'
+      - './data/synapse-media-store:/media_store:Z'
+    networks:
+      backend:
+        ipv4_address: '10.0.0.15'
+
+  matrix-irc:
+    build:
+      context: './dockerfiles/matrix-irc'
+    env_file:
+      - './env/matrix-irc.env'
+    restart: 'unless-stopped'
+    volumes:
+      - './data/matrix-irc:/data:Z'
+      - './data/synapse-app-services:/app-services:Z'
+    networks:
+      backend:
+        ipv4_address: '10.0.0.16'
+
   nginx:
     build:
       context: './dockerfiles/nginx'
@@ -88,9 +126,11 @@ services:
       - '5281'
       - '31415'
       - '8000'
+      - '8448'
     ports:
       - '31416:31415'
       - '8000:8000'
+      - '8448:8448'
 
 networks:
   backend:
