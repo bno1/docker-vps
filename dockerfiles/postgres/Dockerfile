@@ -1,4 +1,4 @@
-FROM postgres:latest
+FROM postgres:11
 
 COPY seafile-db.sh /docker-entrypoint-initdb.d/
 COPY prosody-db.sh /docker-entrypoint-initdb.d/

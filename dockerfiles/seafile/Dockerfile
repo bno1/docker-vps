@@ -32,7 +32,7 @@ RUN set -x \
 RUN set -x \
     && mkdir /seafile \
     && cd /seafile \
-    && wget https://download.seadrive.org/seafile-server_6.3.2_x86-64.tar.gz -O seafile-server.tar.gz \
+    && wget https://download.seadrive.org/seafile-server_6.3.4_x86-64.tar.gz -O seafile-server.tar.gz \
     && tar xf seafile-server.tar.gz \
     && rm seafile-server.tar.gz \
     && mv seafile-server-* seafile-server

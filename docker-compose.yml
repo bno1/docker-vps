@@ -74,8 +74,8 @@ services:
     build:
       context: './dockerfiles/synapse'
       args:
-        SYNAPSE_TAG: 'v0.33.3'
-        SYNAPSE_HOST: 'example.org'
+        SYNAPSE_TAG: 'v0.33.6'
+        SYNAPSE_HOST: 'bnounu.com'
     env_file:
       - './secrets/synapse-db.env'
       - './secrets/synapse-pepper.env'
@@ -107,6 +107,16 @@ services:
       backend:
         ipv4_address: '10.0.0.16'
 
+  weechat:
+    build:
+      context: './dockerfiles/weechat'
+    restart: 'unless-stopped'
+    volumes:
+      - './data/weechat:/weechat-data:Z'
+    networks:
+      backend:
+        ipv4_address: '10.0.0.17'
+
   nginx:
     build:
       context: './dockerfiles/nginx'
@@ -125,10 +135,13 @@ services:
       - '5222'
       - '5281'
       - '31415'
+      - '31416'
+      - '31417'
       - '8000'
       - '8448'
     ports:
-      - '31416:31415'
+      - '31416:31416'
+      - '31417:31417'
       - '8000:8000'
       - '8448:8448'
 

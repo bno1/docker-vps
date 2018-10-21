@@ -16,14 +16,15 @@ http {
                       '$status $body_bytes_sent "$http_referer" '
                       '"$http_user_agent" "$http_x_forwarded_for"';
 
-    access_log  /var/log/nginx/access.log  main;
+    #access_log  /var/log/nginx/access.log  main;
+    access_log  off;
 
     sendfile        on;
     #tcp_nopush     on;
 
     keepalive_timeout  65;
 
-    #gzip  on;
+    gzip  on;
 
     #include /etc/nginx/conf.d/*.conf;
 
@@ -88,7 +89,8 @@ http {
 
             client_max_body_size 0;
 
-            access_log      /var/log/nginx/seahub.access.log;
+            #access_log      /var/log/nginx/seahub.access.log;
+            access_log      off;
             error_log       /var/log/nginx/seahub.error.log;
         }
 
@@ -106,6 +108,7 @@ http {
         }
     }
 
+    # synapse
     server {
         listen 8448 ssl;
         server_name "${NGINX_HOST}";
@@ -122,8 +125,39 @@ http {
 
             proxy_read_timeout  1200s;
 
-            access_log      /var/log/nginx/synapse.access.log;
+            client_max_body_size 50m;
+
+            #access_log      /var/log/nginx/synapse.access.log;
+            access_log      off;
             error_log       /var/log/nginx/synapse.error.log;
+        }
+    }
+
+    # weechat relay
+    server {
+        listen 31417 ssl;
+        server_name "${NGINX_HOST}";
+
+        add_header Strict-Transport-Security "max-age=31536000; includeSubDomains";
+
+        location /weechat {
+            proxy_pass         http://10.0.0.17:31417;
+            proxy_set_header   Host $host;
+            proxy_set_header   X-Real-IP $remote_addr;
+            proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header   X-Forwarded-Host $server_name;
+            proxy_set_header   X-Forwarded-Proto https;
+            proxy_set_header   Upgrade $http_upgrade;
+            proxy_set_header   Connection "Upgrade";
+            proxy_buffering    off;
+
+            proxy_read_timeout  1200s;
+
+            client_max_body_size 50m;
+
+            #access_log      /var/log/nginx/weechat.access.log;
+            access_log      off;
+            error_log       /var/log/nginx/weechat.error.log;
         }
     }
 }
@@ -149,6 +183,13 @@ stream {
     server {
         listen 31415 ssl;
         proxy_pass 10.0.0.13:31415;
+        tcp_nodelay on;
+    }
+
+    # weechat irc proxy
+    server {
+        listen 31416 ssl;
+        proxy_pass 10.0.0.17:31416;
         tcp_nodelay on;
     }
 }
