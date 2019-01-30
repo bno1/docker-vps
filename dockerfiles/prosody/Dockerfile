@@ -1,4 +1,4 @@
-FROM debian:stretch-slim
+FROM debian:9-slim
 
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \

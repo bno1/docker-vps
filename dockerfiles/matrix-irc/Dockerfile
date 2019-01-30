@@ -1,4 +1,4 @@
-FROM node:6-stretch
+FROM node:8-stretch-slim
 
 ENV MATRIX_IRC_BOTNAME=IRCBot
 
@@ -8,12 +8,13 @@ RUN set -x \
     && apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
        gettext-base \
-    && npm install matrix-appservice-irc --global \
+       git \
+       python \
+       python3 \
+       build-essential \
+       libicu-dev \
+    && npm install matrix-appservice-irc --global --unsafe \
     && rm -rf /var/lib/apt/lists/*
-
-RUN set -x \
-    && mkdir -p /data /app-services \
-    && chown -R synapse:synapse /data /app-services
 
 ADD start.sh /start.sh
 
