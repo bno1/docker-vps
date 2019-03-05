@@ -74,7 +74,6 @@ services:
     build:
       context: './dockerfiles/synapse'
       args:
-        SYNAPSE_TAG: 'v0.34.1.1'
         SYNAPSE_HOST: 'bnounu.com'
     env_file:
       - './secrets/synapse-db.env'

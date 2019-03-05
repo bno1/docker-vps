@@ -1,6 +1,6 @@
 FROM debian:stretch-slim
 
-ARG SYNAPSE_TAG=master
+ARG SYNAPSE_TAG=v0.99.2
 ARG SYNAPSE_HOST=example.org
 
 RUN set -x \
