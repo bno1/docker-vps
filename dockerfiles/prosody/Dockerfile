@@ -1,4 +1,4 @@
-FROM debian:9-slim
+FROM debian:buster-slim
 
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -9,7 +9,7 @@ RUN apt-get update \
 
 RUN wget https://prosody.im/files/prosody-debian-packages.key -O- | apt-key add -
 
-RUN echo deb http://packages.prosody.im/debian stretch main >> /etc/apt/sources.list
+RUN echo deb http://packages.prosody.im/debian buster main >> /etc/apt/sources.list
 
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \

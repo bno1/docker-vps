@@ -1,4 +1,4 @@
-FROM debian:stretch-slim
+FROM debian:buster-slim
 
 RUN set -e \
     && groupadd -r weechat --gid=999 \
@@ -10,7 +10,7 @@ RUN set -e \
        gnupg2 \
        dirmngr \
     && apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 11E9DE8848F2B65222AA75B8D1820DB22A11534E \
-    && echo 'deb https://weechat.org/debian stretch main' > /etc/apt/sources.list.d/weechat.list \
+    && echo 'deb https://weechat.org/debian buster main' > /etc/apt/sources.list.d/weechat.list \
     && apt update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
        weechat-headless \

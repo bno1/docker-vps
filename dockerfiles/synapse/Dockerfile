@@ -1,6 +1,6 @@
-FROM debian:stretch-slim
+FROM debian:buster-slim
 
-ARG SYNAPSE_TAG=v0.99.2
+ARG SYNAPSE_TAG=v1.3.1
 ARG SYNAPSE_HOST=example.org
 
 RUN set -x \
@@ -21,7 +21,8 @@ RUN set -x \
        libxslt1-dev \
        gettext-base \
        libpq-dev \
-    && python3 -m pip install --upgrade pip wheel psycopg2 \
+    && python3 -m pip install --upgrade pip wheel \
+    && pip install --upgrade psycopg2 jinja2 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN set -x \

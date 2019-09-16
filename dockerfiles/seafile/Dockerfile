@@ -1,4 +1,4 @@
-FROM debian:stretch-slim
+FROM debian:buster-slim
 
 ENV SEAFILE_SERVER_NAME=seafile
 ENV SEAFILE_DOMAIN=127.0.0.1
@@ -16,7 +16,7 @@ RUN set -x \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
        python \
        python-setuptools \
-       python-imaging \
+       python-pil \
        python-psycopg2 \
        python-pylibmc \
        python-pip \
@@ -32,16 +32,17 @@ RUN set -x \
 RUN set -x \
     && mkdir /seafile \
     && cd /seafile \
-    && wget https://download.seadrive.org/seafile-server_6.3.4_x86-64.tar.gz -O seafile-server.tar.gz \
+    && wget https://download.seadrive.org/seafile-server_7.0.4_x86-64.tar.gz -O seafile-server.tar.gz \
     && tar xf seafile-server.tar.gz \
     && rm seafile-server.tar.gz \
-    && mv seafile-server-* seafile-server
+    && mv seafile-server-* seafile-server \
+    && chown -R seafile:seafile /seafile
 
 ADD start.sh /seafile/start.sh
+ADD setup.sh /seafile/setup.sh
 
 RUN set -x \
-    && chown -R seafile:seafile /seafile \
-    && chmod 755 /seafile/start.sh
+    && chmod 755 /seafile/start.sh /seafile/setup.sh
 
 USER seafile
-CMD ["/seafile/start.sh"]
+CMD ["bash", "-c", "/seafile/setup.sh && /seafile/start.sh"]

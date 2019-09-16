@@ -1,4 +1,4 @@
-FROM node:8-stretch-slim
+FROM node:10-buster-slim
 
 ENV MATRIX_IRC_BOTNAME=IRCBot
 
