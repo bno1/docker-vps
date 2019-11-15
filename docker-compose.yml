@@ -16,6 +16,17 @@ services:
       backend:
         ipv4_address: '10.0.0.10'
 
+  postgres-upgrade:
+    build:
+      context: './dockerfiles/postgres-upgrade'
+    env_file:
+      - './secrets/postgres.env'
+      - './secrets/prosody-db.env'
+      - './secrets/seafile-db.env'
+      - './secrets/synapse-db.env'
+    volumes:
+      - './data/postgres/:/var/lib/postgresql/data:Z'
+
   memcached:
     build:
       context: './dockerfiles/memcached'

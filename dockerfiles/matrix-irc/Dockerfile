@@ -1,5 +1,7 @@
 FROM node:10-buster-slim
 
+ARG MATRIX_IRC_TAG=0.13.1
+
 ENV MATRIX_IRC_BOTNAME=IRCBot
 
 RUN set -x \
@@ -13,8 +15,12 @@ RUN set -x \
        python3 \
        build-essential \
        libicu-dev \
-    && npm install matrix-appservice-irc --global --unsafe \
+       git \
     && rm -rf /var/lib/apt/lists/*
+
+RUN git clone --branch "$MATRIX_IRC_TAG" https://github.com/matrix-org/matrix-appservice-irc.git \
+    && cd matrix-appservice-irc \
+    && npm install --global
 
 ADD start.sh /start.sh
 
