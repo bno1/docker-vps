@@ -1,6 +1,6 @@
 FROM debian:buster-slim
 
-ARG SYNAPSE_TAG=v1.5.1
+ARG SYNAPSE_TAG=v1.9.1
 ARG SYNAPSE_HOST=example.org
 
 RUN set -x \
