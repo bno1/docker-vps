@@ -167,6 +167,12 @@ services:
       - '8000:8000'
       - '8448:8448'
 
+  tester:
+    build:
+      context: './dockerfiles/tester'
+    networks:
+      - backend
+
 networks:
   backend:
     driver: 'bridge'
