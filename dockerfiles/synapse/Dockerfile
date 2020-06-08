@@ -7,6 +7,7 @@ RUN set -x \
     && groupadd -r synapse --gid=999 \
     && useradd -r -g synapse --uid=999 --shell=/bin/false synapse \
     && apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -y \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
        git \
        build-essential \

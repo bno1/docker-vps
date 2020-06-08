@@ -13,6 +13,7 @@ RUN set -x \
     && groupadd -r seafile --gid=999 \
     && useradd -r -g seafile --uid=999 --shell=/bin/false seafile \
     && apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -y \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
        python \
        python-setuptools \

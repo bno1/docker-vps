@@ -4,6 +4,7 @@ RUN set -e \
     && groupadd -r weechat --gid=999 \
     && useradd -r -g weechat --uid=999 --shell=/bin/false weechat \
     && apt update \
+    && DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -y \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
        apt-transport-https \
        ca-certificates \
