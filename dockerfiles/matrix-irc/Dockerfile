@@ -1,6 +1,6 @@
-FROM node:13-buster-slim
+FROM node:14-buster-slim
 
-ARG MATRIX_IRC_TAG=0.15.1
+ARG MATRIX_IRC_TAG=0.17.1
 
 ENV MATRIX_IRC_BOTNAME=IRCBot
 
