@@ -127,6 +127,18 @@ services:
       backend:
         ipv4_address: '10.0.0.17'
 
+  telnot:
+    build:
+      context: './dockerfiles/telnot'
+    restart: 'unless-stopped'
+    volumes:
+      - './data/telnot:/telnot-data:Z'
+    expose:
+      - '5000'
+    networks:
+      backend:
+        ipv4_address: '10.0.0.21'
+
   nginx:
     build:
       context: './dockerfiles/nginx'
