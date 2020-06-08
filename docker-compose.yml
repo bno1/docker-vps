@@ -27,6 +27,19 @@ services:
     volumes:
       - './data/postgres/:/var/lib/postgresql/data:Z'
 
+  mariadb:
+    build:
+      context: './dockerfiles/mariadb'
+    restart: 'unless-stopped'
+    env_file:
+      - './secrets/mariadb.env'
+      - './secrets/seafile-db.env'
+    volumes:
+      - './data/mariadb/:/var/lib/mysql:Z'
+    networks:
+      backend:
+        ipv4_address: '10.0.0.22'
+
   memcached:
     build:
       context: './dockerfiles/memcached'
@@ -69,10 +82,11 @@ services:
       - './secrets/seafile-su.env'
     environment:
       - 'SEAFILE_POSTGRES_HOST=postgres'
+      - 'SEAFILE_MYSQL_HOST=mariadb'
       - 'SEAFILE_MEMCACHED_HOST=memcached:11211'
     restart: 'unless-stopped'
     depends_on:
-      - 'postgres'
+      - 'mariadb'
       - 'memcached'
     volumes:
       - './logs/seafile:/seafile/logs:Z'

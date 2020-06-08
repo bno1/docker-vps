@@ -1,0 +1,27 @@
+--- seafile-server-7.1.4/setup-seafile-mysql.py 2020-06-08 18:20:08.811633634 +0300
++++ seafile-server-7.1.4/setup-seafile-mysql.py.new     2020-06-08 18:21:35.916070508 +0300
+@@ -562,6 +562,7 @@
+         self.create_databases()
+
+     def validate_root_passwd(self, password):
++        return "whatever"
+         try:
+             self.root_conn = self.check_mysql_user('root', password)
+         except InvalidAnswer:
+@@ -583,6 +584,7 @@
+                                                 password=True)
+
+     def mysql_user_exists(self, user):
++        return 1
+         cursor = self.root_conn.cursor()
+
+         sql = '''SELECT EXISTS(SELECT 1 FROM mysql.user WHERE user = '%s' and host = '%s')''' % \
+@@ -697,6 +699,7 @@
+             cursor.close()
+
+     def create_databases(self):
++        return
+         self.create_db(self.ccnet_db_name)
+         self.create_db(self.seafile_db_name)
+         self.create_db(self.seahub_db_name)
+

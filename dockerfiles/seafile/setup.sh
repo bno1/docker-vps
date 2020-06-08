@@ -2,6 +2,15 @@
 
 set -e
 
+SEAFILE_DIR=$1
+
+echo "Got seafile directory: \"$SEAFILE_DIR\""
+
+if [ -z "$SEAFILE_DIR" ]; then
+    echo "Error: empty seafile directory"
+    exit 1
+fi
+
 function link_file() {
     if [ ! -L "./$1" ]; then
         if [ ! -e "data/$1" ]; then
@@ -14,7 +23,7 @@ function link_file() {
     fi
 }
 
-CONF_DIRS=(conf ccnet seafile-data seahub-data seahub.db)
+CONF_DIRS=(conf ccnet seafile-data seahub-data)
 
 cd /seafile
 mkdir -p ./data
@@ -26,47 +35,29 @@ for cf in ${CONF_DIRS[@]}; do
 done
 
 if [ ! -e ./conf ] || [ ! -e ./data/conf ]; then
-    ./seafile-server/setup-seafile.sh auto -n "$SEAFILE_SERVER_NAME" -i "$SEAFILE_DOMAIN" -p "$SEAFILE_PORT" -d /seafile/data/storage
+    patch -p0 < ./setup.patch
+    "./$SEAFILE_DIR/setup-seafile-mysql.sh" \
+        auto \
+        -n "$SEAFILE_SERVER_NAME" \
+        -i "$SEAFILE_DOMAIN" \
+        -p "$SEAFILE_PORT" \
+        -d /seafile/seafile-data \
+        -o "$SEAFILE_MYSQL_HOST" \
+        -t 3306 \
+        -u "seafile" \
+        -w "$SEAFILE_DB_PASSWORD" \
+	-q "127.0.0.1" \
+	-r "notallowed" \
+        -c "ccnet_db" \
+        -s "seafile_db" \
+        -b "seahub_db"
 
     if [ -n "$SEAFILE_WEB_WORKERS" ]; then
-        sed -i "s/workers\s*=\s*[0-9]\+/workers = $SEAFILE_WEB_WORKERS/g" conf/gunicorn.conf
+        sed -i "s/workers\s*=\s*[0-9]\+/workers = $SEAFILE_WEB_WORKERS/g" conf/gunicorn.conf.py
     fi
 
-    sed -i 's/bind = "127\.0\.0\.1:8000"/bind = "0.0.0.0:8000"/g' conf/gunicorn.conf
+    sed -i 's/bind = "127\.0\.0\.1:8000"/bind = "0.0.0.0:8000"/g' conf/gunicorn.conf.py
     sed -i "s/SERVICE_URL\s*=.*/SERVICE_URL = https:\/\/$SEAFILE_DOMAIN:8000/g" conf/ccnet.conf
-
-    cat >>conf/ccnet.conf <<EOF
-
-[Database]
-ENGINE=pgsql
-HOST=$SEAFILE_POSTGRES_HOST
-USER=seafile
-PASSWD=$SEAFILE_DB_PASSWORD
-DB=ccnet_db
-EOF
-
-    cat >>conf/seafile.conf <<EOF
-
-[database]
-type=pgsql
-host=$SEAFILE_POSTGRES_HOST
-user=seafile
-password=$SEAFILE_DB_PASSWORD
-db_name=seafile_db
-EOF
-
-    cat >>conf/seahub_settings.py <<EOF
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME' : 'seahub_db',
-        'USER' : 'seafile',
-        'PASSWORD' : '$SEAFILE_DB_PASSWORD',
-        'HOST' : '$SEAFILE_POSTGRES_HOST',
-    }
-}
-EOF
 
     if [ -n "$SEAFILE_MEMCACHED_HOST" ]; then
         cat >>conf/seahub_settings.py <<EOF
@@ -88,16 +79,6 @@ EOF
 
 FILE_SERVER_ROOT = 'https://$SEAFILE_DOMAIN:8000/seafhttp'
 EOF
-
-    export CCNET_CONF_DIR=/seafile/ccnet
-    export SEAFILE_CENTRAL_CONF_DIR=/seafile/conf
-    export SEAFILE_CONF_DIR=/seafile/seafile-data
-    INSTALLPATH=/seafile/seafile-server
-    export PYTHONPATH=${INSTALLPATH}/seafile/lib64/python2.7/site-packages:${INSTALLPATH}/seahub/thirdpart:$PYTHONPATH
-    pushd "$INSTALLPATH/seahub"
-    python manage.py makemigrations
-    python manage.py migrate --run-syncdb
-    popd
 
     cat >>conf/admin.txt <<EOF
 {
